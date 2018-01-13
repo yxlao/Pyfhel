@@ -11,28 +11,17 @@ ext_modules = [
         name="Pyfhel",
         sources=["Pyfhel.pyx"],
         include_dirs=[],
-        libraries=[ "gmp",
-                    "ntl",
-                    "fhe",
-                    "afhel"
-                    ],
-        library_dirs=["/usr/include/python2.7",
-                      "/usr/include/x86_64-linux-gnu/python2.7",
-                    ],
+        libraries=["gmp", "ntl", "fhe", "afhel"],
+        library_dirs=[
+            "/usr/include/python2.7",
+            "/usr/include/x86_64-linux-gnu/python2.7",
+        ],
         language="c++",
-        extra_compile_args=["-std=c++11",
-                            "-DNDEBUG",
-                            "-g",
-                            "-fwrapv",
-                            "-O2",
-                            "-Wfatal-errors",
-                            "-Wall",
-                            "-fPIC",
-                            "-pthread", 
-                            "-DFHE_THREADS",
-                            "-DFHE_DCRT_THREADS", 
-                            "-DFHE_BOOT_THREADS"
-                            ],
+        extra_compile_args=[
+            "-std=c++11", "-DNDEBUG", "-g", "-fwrapv", "-O2", "-Wfatal-errors",
+            "-Wall", "-fPIC", "-pthread", "-DFHE_THREADS",
+            "-DFHE_DCRT_THREADS", "-DFHE_BOOT_THREADS"
+        ],
     ),
     Extension(
         name="PyPtxt",
@@ -53,8 +42,8 @@ ext_modules = [
 ]
 
 setup(
-    name = 'Pyfhel',
-    version = '2.0.1',
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = ext_modules,
+    name='Pyfhel',
+    version='2.0.1',
+    cmdclass={'build_ext': build_ext},
+    ext_modules=ext_modules,
 )

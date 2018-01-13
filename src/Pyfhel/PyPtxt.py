@@ -3,12 +3,12 @@
 #   --------------------------------------------------------------------
 #   PYthon PlainTeXT is a part of Pyfhel. PyPtxt implements the equivalent
 #   to Ptxt class in Afhel (built on top of HElib) for plaintexts, while
-#   being able to hold several plaintexts in a list of lists and treat them 
+#   being able to hold several plaintexts in a list of lists and treat them
 #   as if they were a single one.
 #   PyPtxt overrides +, -, * and * with standard operations over its lists
 #   --------------------------------------------------------------------
 #   Author: Alberto Ibarrondo and Remy AUDA
-#   Date: 23/11/2017  
+#   Date: 23/11/2017
 #   --------------------------------------------------------------------
 #   License: GNU GPL v3
 #
@@ -27,7 +27,6 @@
 #   --------------------------------------------------------------------
 #
 
-
 from Pyfhel import Pyfhel
 from operator import mod
 
@@ -44,75 +43,96 @@ class PyPtxt:
         self.__numSlots = pyfhel.numSlots()
         self.__pyfhel = pyfhel
         if (pSize > 0):
-            nPart = len(ptxt)/pSize + int(mod(len(ptxt), pSize)>0)
+            nPart = len(ptxt) / pSize + int(mod(len(ptxt), pSize) > 0)
             if (pSize > self.__numSlots):
-                raise ValueError("pSize cannot be bigger than numSlots: " + self.__numSlots)
+                raise ValueError(
+                    "pSize cannot be bigger than numSlots: " + self.__numSlots)
 
-            for i in range(0, nPart):     # Fill the List of lists
-                self.__ptxtList.append(ptxt[ (i*pSize) : ((i+1)*pSize) ])
-            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in self.__ptxtList]
+            for i in range(0, nPart):  # Fill the List of lists
+                self.__ptxtList.append(ptxt[(i * pSize):((i + 1) * pSize)])
+            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst]
+                               for lst in self.__ptxtList]
 
         elif (isinstance(ptxt[0], list)):
             for elt in ptxt:
                 l = len(elt)
                 if ((l) > self.__numSlots):
-                    raise ValueError("No list can have bigger size than numSlots: " + self.__numSlots)
-            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in ptxt]
+                    raise ValueError(
+                        "No list can have bigger size than numSlots: " +
+                        self.__numSlots)
+            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst]
+                               for lst in ptxt]
 
-        else:       
+        else:
             self.__ptxt = [mod(elt, pyfhel.getModulus()) for elt in ptxt]
             n = max(1, self.__numSlots)
-            self.__ptxtList = [ptxt[i:i + n] for i in range (0, len(ptxt), n)]
+            self.__ptxtList = [ptxt[i:i + n] for i in range(0, len(ptxt), n)]
         self.__length = ([len(elt) for elt in self.__ptxtList])
         return
 
+    def numSlots(self):
+        return self.__numSlots
 
-    def numSlots(self):         return self.__numSlots
-    def numPtxt(self):          return len(self.__ptxtList)
-    def getPtxtList(self):      return self.__ptxtList
-    def getPtxt(self):          return self.__ptxt
-    def getPyfhel(self):        return self.__pyfhel
-    def getPtxtLen(self):       return self.__length
-    def getPSize(self):         return self.__pSize
+    def numPtxt(self):
+        return len(self.__ptxtList)
+
+    def getPtxtList(self):
+        return self.__ptxtList
+
+    def getPtxt(self):
+        return self.__ptxt
+
+    def getPyfhel(self):
+        return self.__pyfhel
+
+    def getPtxtLen(self):
+        return self.__length
+
+    def getPSize(self):
+        return self.__pSize
 
     # -------------------- OVERRIDE ARITHMETIC OPERATORS -------------------- #
 
-    # ADD:    
+    # ADD:
     # '+' operator
     def __add__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '+' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
-        newPtxt  = PyPtxt(self.getPtxt(), self.getPyfhel())
+            raise TypeError(
+                "PyPtxt '+' error: lhs must be of type PyPtxt or int instead of "
+                + str(type(other)))
+        newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt += other
         return newPtxt
 
     # '+=' operator
     def __iadd__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '+=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '+=' error: lhs must be of type PyPtxt or int instead of type "
+                + str(type(other)))
         from operator import add, mod
         if isinstance(other, PyPtxt):
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(add, self.getPtxt(), other.getPtxt()))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(add, self.getPtxt(), other.getPtxt()))
+            ], self.getPyfhel())
         else:
             constPtxt = [other for _ in range(self.__length)]
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(add, self.getPtxt(), constPtxt))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(add, self.getPtxt(), constPtxt))
+            ], self.getPyfhel())
             del constPtxt
         return self
-
-
 
     # SUBSTRACT:
     # '-' operator
     def __sub__(self, other):
         if not isinstance(other, PyPtxt):
             if not isinstance(other, (PyPtxt, int)):
-                raise TypeError("PyPtxt '-' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
+                raise TypeError(
+                    "PyPtxt '-' error: lhs must be of type PyPtxt or int instead of "
+                    + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt -= other
         return newPtxt
@@ -120,60 +140,64 @@ class PyPtxt:
     # '-=' operator
     def __isub__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '-=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '-=' error: lhs must be of type PyPtxt or int instead of type "
+                + str(type(other)))
         from operator import sub, mod
         if isinstance(other, PyPtxt):
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(sub, self.getPtxt(), other.getPtxt()))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(sub, self.getPtxt(), other.getPtxt()))
+            ], self.getPyfhel())
         else:
             constPtxt = [other for _ in range(self.__length)]
 
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(sub, self.getPtxt(), constPtxt))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(sub, self.getPtxt(), constPtxt))
+            ], self.getPyfhel())
             del constPtxt
         return self
-
-
 
     # MULTIPLY:
     # '*' operator
     def __mul__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '*' error: lhs must be of type PyPtxt or int instead of "
+                + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt *= other
         return newPtxt
- 
+
     # '*=' operator
     def __imul__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '*=' error: lhs must be of type PyPtxt or int instead of type "
+                + str(type(other)))
         from operator import mul, mod
         if isinstance(other, PyPtxt):
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(mul, self.getPtxt(), other.getPtxt()))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(mul, self.getPtxt(), other.getPtxt()))
+            ], self.getPyfhel())
         else:
             constPtxt = [other for _ in range(self.__length)]
-            self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
-                           for elt in
-                           list(map(mul, self.getPtxt(), constPtxt))],
-                          self.getPyfhel())
+            self = PyPtxt([
+                mod(elt, self.__pyfhel.getModulus())
+                for elt in list(map(mul, self.getPtxt(), constPtxt))
+            ], self.getPyfhel())
             del constPtxt
         return self
 
-
- 
     # SCALAR PRODUCT:
     # '%' operator
     def __mod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '*' error: lhs must be of type PyPtxt or int instead of "
+                + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         from operator import mul, mod
         if isinstance(other, PyPtxt):
@@ -183,11 +207,13 @@ class PyPtxt:
             res = sum(list(map(mul, self.getPtxt(), constPtxt)))
             del constPtxt
         return res
-    
+
     # '%=' operator
     def __imod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '*' error: lhs must be of type PyPtxt or int instead of "
+                + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         from operator import mul, mod
         if isinstance(other, PyPtxt):
@@ -197,9 +223,6 @@ class PyPtxt:
             res = sum(list(map(mul, self.getPtxt(), constPtxt)))
             del constPtxt
         return res
-
-
-
 
     # -------------------- OVERRIDE LOGICAL OPERATORS -------------------- #
     # NEGATION:
@@ -211,11 +234,15 @@ class PyPtxt:
     # '==' operator
     def __eq__(self, other):
         if not isinstance(other, PyPtxt):
-            raise TypeError("PyPtxt '==' error: lhs must be of type PyPtxt instead of type " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '==' error: lhs must be of type PyPtxt instead of type "
+                + str(type(other)))
         return self.getPtxt() == other.getPtxt()
 
     # '!=' operator
     def __ne__(self, other):
         if not isinstance(other, PyPtxt):
-            raise TypeError("PyPtxt '!=' error: lhs must be of type PyPtxt instead of type " + str(type(other)))
+            raise TypeError(
+                "PyPtxt '!=' error: lhs must be of type PyPtxt instead of type "
+                + str(type(other)))
         return not self == other
